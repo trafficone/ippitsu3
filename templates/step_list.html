@@ -1,0 +1,141 @@
+{% if projects %}
+<div style="float:left;margin:5px 120px 0px 10px;"><button id="new_step">New Step</button></div>
+<table id="step_list" class="display">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Project</th>
+      <th>Created On</th>
+      <th>Deadline</th>
+      <th>Description</th>
+      <th>Critical</th>
+    </tr>
+  </thead>
+  <tbody >
+  {% for step in steps %}
+    <tr id="step_{{ step.id }}" class="step">
+     <td>{{ step.name }}</td>
+     <td>{{ step.status }}</td>
+     <td>{{ step.project }}</td>
+     <td>{{ step.start_date }}</td>
+     <td>{{ step.deadline }}</td>
+     <td>{{ step.description }}</td>
+     <td>{{ step.mission_critical }}</td>
+    </tr>
+  {% endfor %}
+  </tr>
+  </tbody>
+</table>
+<script type="text/javascript">
+$(document).ready(function(){
+  $("button").button();
+  var bind_steps = function(){
+	    $(".step").click(function(){
+        //load form
+	    });
+
+	  };
+  var steplist = $('#step_list').dataTable({
+    "bJQueryUI": true,
+    "sPaginationType": "full_numbers",
+    "aaSorting": [[1,"desc"]],
+    "bFilter": true,
+    "bSort": true,
+    "aoColumns": [
+      {"sClass":"col_text center","sWidth":"90px"}, 
+      {"sClass":"col_text","sWidth":"90px"},
+      {"sClass":"col_text"},
+      {"sClass":"col_money"},
+      {"sClass":"col_date"},
+      {"sClass":"col_date","sWidth":"240px"}
+    ],
+    "fnDrawCallback": function() {
+      bind_projects();
+    }  
+  });
+  $("#form_dialog").unbind();
+  $("#form_dialog").dialog({
+	    autoOpen:false,
+      height:315,
+      width:630,
+      resizable:false,
+      modal:true,
+  });
+  $("#new_step").click(function(){
+	  $("#form_dialog").load("/step/form/new.php");
+	  $("#form_dialog").dialog("option","title","Create a New Step");
+	  $("#form_dialog").dialog("option","buttons", {
+      "Save":function(){
+        $("#warning_dialog").dialog("option","title","Cannot Save");
+        $("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
+        var success=false;//easy canary
+        $.post("/step/add/newproject.php",
+          $("#step_form").serializeArray(),
+          function(response){
+            success=true;
+            //TODO: update datatables with ajax
+            location.reload();
+          },
+          "json"
+        );
+        if(!success){
+          $("#warning_dialog").dialog("Open");
+        }
+      },
+      "Cancel":function(){
+        $(this).dialog("close");
+      }
+	  });
+	  $("#form_dialog").dialog("open");	  
+  });
+  
+});
+</script>
+{% else %}
+Looks like you don't have any projects yet.
+Get started on your <button id="first">First Project</button>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#first").button();
+	$("#form_dialog").unbind();
+	$("#form_dialog").dialog({
+		  autoOpen:false,
+		  height:315,
+	    width:630,
+	    resizable:false,
+	    modal:true,
+	    buttons: {
+	    	"Save":function(){
+	    		$("#warning_dialog").dialog("option","title","Cannot Save");
+	    		$("#warning_dialog").text("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
+	    		var success=false;//easy canary
+	    		$.post("/project/add/first_project.php",
+	    			$("#project_form").serializeArray(),
+	    			function(response){
+	    				success=true;
+	    				location.reload();
+	    			},
+	    			"json"
+	    		);
+	    		if(!success){
+	    			$("#warning_dialog").dialog("Open");
+	    		}
+	    	},
+	      "Cancel":function(){
+	    	  $(this).dialog("close");
+	      }
+	    }
+	});
+	$("#first").button()
+	$("#first").click(function(){
+		$("#form_dialog").load("/project/form/new.php");
+		$("#form_dialog").dialog("option","title","Create your First Project");
+		$("#form_dialog").dialog("open");
+	});
+});
+</script>
+{% endif %}
+
+
+

@@ -1,0 +1,63 @@
+<div style="width:600px;height:80%;">
+	<form id="step_form">
+	  {% if step.id %}
+	  <input name="id" type="hidden" value="{{ step.id }}"/>
+	  {% endif %}
+		<div style="float:left;">
+			Name:<br />
+			<input type="text" name="name" value="{{ step.name }}" size="30"/><br />
+			Status:<br />
+			<select name="status">
+			  {% for status in statuses %}
+			    <option value="{{ status.id }}" title="{{ status.description }}"
+			    {% if status.id == step.status %}
+			      selected="true"
+			    {% endif %}
+			    >{{ status.name }}</option>
+			  {% endfor %}
+			</select><br />
+		  Project:<br />
+  		<select name="project">
+			  {% for project in projects %}
+			    <option value="{{ project.id }}" title="{{ project.description }}"
+			    {% if project.id = step.project %}
+			      selected="true"
+			    {% endif %}
+			    >{{ project.name }}</option>
+			  {% endfor %}
+			</select><br />
+		<div style="float:right";>
+			Description:<br />
+			<textarea name="description" rows="4" cols="50">{{ step.description }}</textarea><br />
+			<div style="float:left;">
+				Start Date:<br />
+				<input id="start_dt" name="start_date" value="{{ step.start_date }}" size="10" class="dateval" readonly="true"/>
+			</div>
+			<div style="float:left;margin-left:20px;">
+				End Date:<br />
+				<input id="end_dt" name="deadline" value="{{ step.deadline }}" size="10" class="dateval" readonly="true"/>
+			</div>
+      <div style="float:left;margin-left:20px;">
+        Mission Critical:<br />
+        <input id="mission_crit" name="mission_critical" value="{{ step.mission_critical }}" type="checkbox"
+        {% if status.mission_critical = 1 %}
+          selected="true"
+        {% endif %}
+         />
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#start_dt").datepicker({
+	  "dateFormat":"yy/mm/dd"
+  });
+	$("#end_dt").datepicker({
+	  "dateFormat":"yy/mm/dd"
+  });
+	var d = new Date()
+	if($("#start_dt").val()==''){$("#start_dt").val(d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate());}
+	if($("#end_dt").val()==''){$("#end_dt").attr("title","Click to Add");}
+	$("[title]").tooltip()
+});
+</script>

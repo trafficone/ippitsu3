@@ -1,0 +1,173 @@
+<style type="text/css">
+div .tribulation{
+  display:inline-block;
+  vertical-align:top;
+  margin:10px;
+  width:29%;
+}
+</style>
+<div style="float:right;margin-right:10px;">
+  <button id="edit_{{project.id}}" class="edit_project">Edit Project</button>
+</div>
+<div id="project_title" class="ui-widget-header project" style="padding:3px;">
+  {{ project.name }} - {{ project.status.name }}
+</div>
+<div id="project_class" class="ui-widget project">
+  <span style="padding:10px;font-size:1.1em;">{{ project.description }}</span>
+  <ul>
+    <li>Started: {{ project.start_date }}</li>
+    <li>Due: <span id="due">{{ project.deadline }}</span> <span id="remaining"></span></li>
+    <li>Budget: ${{ project.budget_left }} of Original ${{ project.budget }}</li>
+  </ul>
+</div>
+<div class="ui-widget">
+	<ul>
+	<li>Current design</li>
+	<li>--&gt;<s>At the top of the page is the full detail of the project, also the BUDGET REMAINING</s></li>
+	<li>--&gt;<s>Three blocks of the top 10 items in each project summary item: steps, expenses, blocks</s></li>
+	<li>--&gt;Clicking on any specific item will open a detail dialog box with a link to the item</li>
+	<li>--&gt;Every block has a link to the full list of their item</li>
+	</ul>
+	
+	considerations: 
+	<ul>
+	<li><s>editable project</s></li>
+	<li>make user create retrospective on project-status = complete/func.complete/abandon/obsoleted</li>
+	<li><s>pull in steps, expenses, blocks by date</s></li>
+	</ul>
+	<s>add project detail<br /></s>
+	TODO: Make sure all these \{\{\}\} get filled<br />
+	TODO: Create a "set_status" function for project, step &amp; block<br />
+	<s>TODO: Make this pretty in three columns<br /></s>
+</div>
+<div id="summaries">
+  <div id="latest_expenses" class="ui-widget tribulation" >
+    <div class="ui-widget-header">Latest Expenses:<br /></div>
+    {% for expense in latest_expenses %}
+      {{ expense.name }}<br />
+      &nbsp;&nbsp;&nbsp;
+      {% if expense.for %}
+        {{ expense.for }}
+      {% else %}
+        Generic Expense
+      {% endif %}
+      - {{ expense.amount }} - {{ expense.date }}<br />
+    {% endfor %}
+    <button id="expenses">Enter Expenses</button>
+  </div>
+  <div id="critical_steps" class="ui-widget tribulation" >
+    <div class="ui-widget-header">Critical Steps:<br /></div>
+    TODO: Conditional formattting, include better summary<br />
+    {% for step in critical_steps %}
+    <div id="step_{{step.id}}">
+      {{ step.name }}<br />
+      {{ step.description }}
+      <button id="complete_{{ step.id }}" class="step_complete">Step Complete</b                                                                                                                                utton>
+      <br />
+    </div>
+    {% endfor %}
+    <button id="steps">Edit Steps</button>
+  </div>
+  <div id="active_blocks" class="ui-widget tribulation">
+    <div class="ui-widget-header">Active Blocks:<br /></div>
+    TODO: Formatting<br />
+    {% for block in active_blocks %}
+      <div id="block_{{block.id}}">
+        {{ block.name }}
+        {% if block.affects %}
+         - {{ block.affects.name }}
+        {% endif %}
+        <button id="unblock_{{ block.id }}" class="unblock">Unblock</button>
+        <br />
+      </div>
+    {% endfor %}
+    <button id="blocks">Edit Blocks</button>
+    <br />
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $("button").button();
+    $("#form_dialog").unbind();
+    $("#form_dialog").dialog({
+        autoOpen:false,
+        height:315,
+        width:630,
+        resizable:false,
+        modal:true,
+    });
+    $("#steps").click(function(){
+      $("#form_dialog").load("/step/form/add.php");
+      $("#form_dialog").dialog("option","title","Create a new Project");
+      $("#form_dialog").dialog("option","buttons", {
+            "Save":function(){
+            	$("#warning_dialog").dialog("option","title","Cannot Save");
+              $("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
+              var success=false;//easy canary
+              $.post("/step/update/project.php",
+                $("#project_form").serializeArray(),
+                function(response){
+                  if(typeof(response)==='undefined'||response===null||response.indexOf("ERROR")==-1){
+                	  location.reload();
+                  }
+                  //TODO: update page with ajax
+                },
+                "json"
+              );
+              if(!success){
+            	  //TODO: Fix warning dialog
+            	  alert("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
+                $("#warning_dialog").dialog("Open");
+              }
+            },
+            "Cancel":function(){
+              $(this).dialog("close");
+            }
+          });
+        $("#form_dialog").dialog("open");
+
+    });
+    $(".edit_project").click(function(){
+        $("#form_dialog").load("/project/form/edit.php?id="+$(this).attr('id'));
+        $("#form_dialog").dialog("option","title","Alter an Existing Project");
+        $("#form_dialog").dialog("option","buttons", {
+            "Save":function(){
+            	$("#warning_dialog").dialog("option","title","Cannot Save");
+              $("#warning_dialog").text("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
+              var success=false;//easy canary
+              $.post("/project/update/project.php",
+                $("#project_form").serializeArray(),
+                function(response){
+                  if(typeof(response)==='undefined'||response===null||response.indexOf("ERROR")==-1){
+                	  location.reload();
+                  }
+                  //TODO: update page with ajax
+                },
+                "json"
+              );
+              if(!success){
+            	  //TODO: Fix warning dialog
+            	  alert("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
+                $("#warning_dialog").dialog("Open");
+              }
+            },
+            "Cancel":function(){
+              $(this).dialog("close");
+            }
+          });
+        $("#form_dialog").dialog("open");
+      });
+    $(".unblock").each(function(index,value){
+      $(value).click(function(){
+        $.post("/block/status/unblock.php",
+          {"id":$(self).attr('id'),"status":"TODO:CHOOSE STATUS"},
+          function(data){
+            $("#block_"+data).remove();
+          },
+          "json");
+      });
+    });
+    //TODO: Add logic for event removal
+    //TODO: Make links out of buttons
+  });
+</script>

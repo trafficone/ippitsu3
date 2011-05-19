@@ -1,0 +1,9 @@
+cron:
+- description: weekly project summary
+  url: reports/weekly
+  schedule: every sunday 13:00
+  timezone: America/Los_Angeles
+- description: daily item due
+  url: reports/daily
+  schedule: every 24 hours
+  timezone: America/Los_Angeles

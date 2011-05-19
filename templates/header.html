@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <title>Ippitsu San - The Project Datastore</title>
+  </head>
+  <body>
+    <div id="form_dialog" class="dialog"></div>
+    <div id="warning_dialog" class="dialog"></div>
+    <noscript>
+      <div  class="ui-corner-all ui-shadow" style="background:#ff0000;width:800px;border:solid 5px #ffffff;padding:10px;margin:auto;">
+        <p style="text-align:center;font-size:2em;color:#004400;">JAVASCRIPT-FREE WARNING!</p>
+        It looks like you're not using java script... 
+        <span style="font-size:1em;color:#ffffff;padding:10px;">
+          I'm sorry, you're probably not using Javascript because the Internet is a really scary place. And I'd normally
+          be first in line to turn javascript off, and I often am, but javascript is a great tool to make a great dynamic site.
+          So, my site requires you to have javascript turned on.  <em>I'm serious.</em><br/>&nbsp;&nbsp;I'm really sorry if this puts a 
+          burdon on our relationship, and I hope you'll be willing to stick it out.  If you're really just not cool with using javascript, 
+          that's okay maybe we can still be friends.  If you're more energetic than I, you can fork me on github and write a
+           javascript-free version of this site.
+        </span>
+      </div>
+    </noscript>
+    {% autoescape off %}
+    {{ not_ajax }}
+    {% endautoescape %}
+    <div id="container" class="ui-widget ui-shadow ui-corner-all">
+	    <div id="header" style="margin:10px 0px 5px 10px;padding:10px 10px 15px 10px;">
+	      <span style="font-size:1.8em;font-family:\"Times New Roman\",Georgia,serif;">Ippitsu <em>San</em></span> 
+		    <div id="menu" style="float:right;">
+		      {% for menuitem in menu %}
+		        <input type="radio" id="{{ menuitem }}" class="link" name="radio" 
+		       {% if menuitem == title.primary %}
+		        checked="checked"
+		       {% endif %}
+		       \><label for="{{ menuitem }}" class="linkage">{{ menuitem }}</label>
+		      {% endfor %}
+	      </div>
+	    </div>
+      <div id="title" class="ui-widget-header ui-corner-top" style="padding:10px;">
+        <span id="maintitle">{{ title.primary }}</span> 
+        {% if  title.secondary %}
+          <span id="subtitle">{{ title.secondary }}</span>
+        {% endif %}
+        {% if title.user %}
+          <span style="color:777777;font-size:.7em;float:right;">Welcome - {{ title.user }} &nbsp;&nbsp;<a href="{{ title.logout }}">logout</a></span>
+        {% endif %}
+      </div>
+	    <div id="content" class="ui-widget-content" style="padding:10px;">
+	    {% autoescape off %}
+	      {{ content }}
+	    {% endautoescape %}
+	    </div>
+	    <div id="footer" class="ui-widget-header ui-corner-bottom" style="padding:10px;">
+	    <span style="float:right;font-size:.5em;color:#aaaaaa;">Copyright 2011 Industrial Systems All Rights Reserved.</span>
+	    <span style="font-size:.5em;margin:10px;padding:10px;">
+	      <a href="/about.html">About Us</a> |
+	      <a href="/legal.html">Legal Disclaimers</a> |
+	      <a href="/contact.html">Contact Us</a></span>
+	    </div>
+	  </div>
+	  <script type="text/javascript">
+	    $(document).ready(function(){
+	    	$(".dialog").dialog({
+	    		autoOpen:false,
+	    		modal:true
+	    	});
+	    	$("#warning_dialog").dialog("option","buttons",{"Ok":function(){$(this).dialog("close");}});
+      	$(".linkage").each(function(index,value){
+          var val = $(value)
+          val.text(val.text().substr(0,1).toUpperCase()+val.text().substr(1))
+        });
+      	$(".link").each(function(index,value){
+      		var val = $(value);
+        	val.click(function(){
+      			var link = val.attr("id")
+      			if (link == "projects"){
+      				document.location = "/project/list_view/list.php";
+      			} else if (link == "login") {
+      				document.location="login.php";
+        	  } else {
+        		  $("#content").load("/"+link);
+        		  var title = $("#maintitle");
+        	    title.text(link.substr(0,1).toUpperCase()+link.substr(1));
+        	    $("#subtitle").text("");
+      			}
+      		});
+      	});
+	    	
+	    	$("#menu").buttonset();
+	    	var title = $("#maintitle");
+	      title.text(title.text().substr(0,1).toUpperCase()+title.text().substr(1));
+	      var title = $("#subtitle");
+	      title.text(" - "+title.text().substr(0,1).toUpperCase()+title.text().substr(1).replace('_',' '));
+	    });
+	  </script>
+  </body>
+</html>

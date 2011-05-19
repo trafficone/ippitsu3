@@ -1,0 +1,49 @@
+<div style="width:600px;height:80%;">
+	<form id="project_form">
+	  {% if project.id %}
+	  <input name="id" type="hidden" value="{{ project.id }}"/>
+	  {% endif %}
+		<div style="float:left;">
+			Name:<br />
+			<input type="text" name="name" value="{{ project.name }}" size="30"/><br />
+			Status:<br />
+			<select name="status">
+			  {% for status in statuses %}
+			    <option value="{{ status.id }}" title="{{ status.description }}"
+			    {% if status.id == project.status %}
+			      selected="true"
+			    {% endif %}
+			    >{{ status.name }}</option>
+			  {% endfor %}
+			</select><br />
+			Budget:<br />
+			<input type="text" name="budget" value="{{ project.budget }}" size="30"/><br />
+		</div>
+		<div style="float:right";>
+			Description:<br />
+			<textarea name="description" rows="4" cols="45">{{ project.description }}</textarea><br />
+			<div style="float:left;">
+				Start Date:<br />
+				<input id="start_dt" name="start_date" value="{{ project.start_date }}" size="10" class="dateval" readonly="true"/>
+			</div>
+			<div style="float:left;margin-left:20px;">
+				End Date:<br />
+				<input id="end_dt" name="deadline" value="{{ project.deadline }}" size="10" class="dateval" readonly="true"/>
+			</div>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#start_dt").datepicker({
+	  "dateFormat":"yy/mm/dd"
+  });
+	$("#end_dt").datepicker({
+	  "dateFormat":"yy/mm/dd"
+  });
+	var d = new Date()
+	if($("#start_dt").val()==''){$("#start_dt").val(d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate());}
+	if($("#end_dt").val()==''){$("#end_dt").attr("title","Click to Add");}
+	$("[title]").tooltip()
+});
+</script>

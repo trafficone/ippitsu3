@@ -1,0 +1,60 @@
+application: ippitsu2
+version: 2
+runtime: python
+api_version: 1
+
+handlers:
+- url: /
+  script: main.py
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+
+- url: /css
+  static_dir: css
+  
+- url: /(.*\.(jpg|png|gif|ico))
+  static_files: images/\1
+  upload: images/(.*\.(jpg|png|gif|ico))
+    
+- url: /js
+  static_dir: js
+
+- url: /reports/.*
+  script: reports.py
+  login: admin
+
+- url: /admin/.*
+  script: admin.py
+  login: admin
+
+- url: /project/.*
+  script: main.py
+  login: required
+
+- url: /status/.*
+  script: main.py
+  login: required
+
+- url: /step/.*
+  script: main.py
+  login: required
+
+- url: /block/.*
+  script: main.py
+  login: required
+
+- url: /expense/.*
+  script: main.py
+  login: required
+
+- url: /ippitsu2
+  script: ippitsu.py
+
+- url: /login.*
+  script: main.py
+  login: required
+
+- url: /.*
+  script: main.py
