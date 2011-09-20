@@ -16,7 +16,7 @@
     <tr id="project_{{ project.id }}" class="project">
      <td>{{ project.name }}</td>
      <td>{{ project.status }}</td>
-     <td title="Original: ${{ project.budget }}">${{ project.budget_left }}</td>
+     <td title="Original: {{ project.budget }}">{{ project.budget_left }}</td>
      <td>{{ project.start_date }}</td>
      <td>{{ project.deadline }}</td>
      <td>{{ project.description }}</td>

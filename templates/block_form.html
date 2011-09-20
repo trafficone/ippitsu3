@@ -1,0 +1,72 @@
+<div style="width:600px;height:80%;">
+	<form id="block_form">
+	  {% if block.id %}
+	  <input name="id" type="hidden" value="{{ block.id }}"/>
+	  {% endif %}
+		<div style="float:left;">
+			Name:<br />
+			<input type="text" name="name" value="{{ block.name }}" size="30"/><br />
+			Status:<br />
+			<select name="status">
+			  {% for status in statuses %}
+			    <option value="{{ status.id }}" title="{{ status.description }}"
+			    {% if status.id == block.status %}
+			      selected="true"
+			    {% endif %}
+			    >{{ status.name }}</option>
+			  {% endfor %}
+			</select><br />
+      <div>
+        <div style="float:left;">
+          <!-- Project:<br />
+          <select name="project" id="pickproj">
+            {% for proj in projects %}
+              <option value="{{ proj.id }}" title="{{ proj.description }}"
+              {% if proj.name = block.project %}
+                selected="true"
+              {% endif %}
+              >{{ proj.name }}</option>
+            {% endfor %}
+          </select> -->
+          Project: {{ block.project.name }}<br />
+          <input type="hidden" name="project" value="{{block.project.id}}" />
+        </div>
+        <div style="float:right;">
+          Step:<br />
+          <select name="step" id="steps_block">
+            <option value="" title="None">None</option>
+            {% for step in steps %}
+              <option value="{{step.id}}" title="{{step.description}}"
+              {% if step.name = block.step  %}
+                selected="true"
+              {% endif %}
+              >{{step.name}}</option>
+            {% endfor %}
+           </select><br />
+        </div>
+      </div>
+		<div style="float:right;">
+			Description:<br />
+			<textarea name="description" rows="4" cols="50">{{ block.description }}</textarea><br />
+			<div style="float:left;">
+				Discovery Date:<br />
+				<input id="discovery_dt" name="discovery_date" value="{{ block.discovery_date }}" size="10" class="dateval" readonly="true"/>
+			</div>
+			<div style="float:left;margin-left:20px;">
+				Cost to Fix:<br />
+				<input id="fixcost" name="fix_cost" value="{{ block.fix_cost }}" size="10"/>
+			</div>
+      <div style="float:left;margin-left:20px;">
+      </div>
+	</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#discovery_dt").datepicker({
+	  "dateFormat":"yy/mm/dd"
+  });
+	var d = new Date()
+	if($("#discovery_dt").val()==''){$("#discovery_dt").val(d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate());}
+	$("[title]").tooltip();
+});
+</script>

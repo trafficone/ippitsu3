@@ -13,6 +13,13 @@ indexes:
 - kind: Block
   properties:
   - name: project
+  - name: status
+  - name: fix_cost
+    direction: desc
+
+- kind: Block
+  properties:
+  - name: project
   - name: status.name
   - name: fix_cost
     direction: desc
@@ -21,6 +28,12 @@ indexes:
   properties:
   - name: project
   - name: date
+
+- kind: Step
+  properties:
+  - name: project
+  - name: status
+  - name: deadline
 
 - kind: Step
   properties:

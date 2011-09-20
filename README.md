@@ -45,6 +45,7 @@ To remedy this, it might be best to treat each milestone as a project, such as a
 # New Features
 
 I plan on adding to the functionality of ippitsu 3 over time, the following features I would like to add (in no particular order):
+
 * Collaboration tools - Share your projects with others and let them work on it too
 * Charts and Graphs - Watch your projects turn from mystical plans into reality
 * Gantt Charts - Like the professionals use

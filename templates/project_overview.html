@@ -17,8 +17,48 @@ div .tribulation{
   <ul>
     <li>Started: {{ project.start_date }}</li>
     <li>Due: <span id="due">{{ project.deadline }}</span> <span id="remaining"></span></li>
-    <li>Budget: ${{ project.budget_left }} of Original ${{ project.budget }}</li>
+    <li>Budget: {{ project.budget_left }} of Original {{ project.budget }}</li>
   </ul>
+</div>
+<div id="summaries">
+  <div id="latest_expenses" class="ui-widget tribulation" >
+    <div class="ui-widget-header">Latest Expenses:<br /></div>
+    {% for expense in expenses %}
+      {{ expense.name }} - {{ expense.amount }} - {{ expense.date }}<br />
+    {% endfor %}
+    <button id="project_{{project.id}}" class="budget_sheet">Budget Sheet</button>
+    <button id="expenses">Enter Expense</button>
+  </div>
+  <div id="critical_steps" class="ui-widget tribulation" >
+    <div class="ui-widget-header">Critical Steps:<br /></div>
+    TODO: Make this pretty<br />
+    {% for step in steps %}
+    <div id="step_{{step.id}}">
+      {{ step.name }} - {{ step.description }}&nbsp;
+      <button id="complete_{{ step.id }}" class="step_complete">Step Complete</button>
+      <br />
+    </div>
+    {% endfor %}
+    <button id="steps">Create Step</button>
+    <button id="project_{{ project.id }}" class="edit_steps">Edit Steps</button>
+  </div>
+  <div id="active_blocks" class="ui-widget tribulation">
+    <div class="ui-widget-header">Active Blocks:<br /></div>
+    TODO: Formatting<br />
+    {% for block in blocks %}
+      <div id="block_{{block.id}}">
+        {{ block.name }}
+        {% if block.affects %}
+         - {{ block.affects.name }}
+        {% endif %}
+        <button id="unblock_{{ block.id }}" class="unblock">Unblock</button>
+        <br />
+      </div>
+    {% endfor %}
+    <button id="blocks">Add Block</button>
+    <button id="project_{{ project.id }}" class="edit_blocks">Edit Blocks</button>
+    <br />
+  </div>
 </div>
 <div class="ui-widget">
 	<ul>
@@ -35,77 +75,35 @@ div .tribulation{
 	<li>make user create retrospective on project-status = complete/func.complete/abandon/obsoleted</li>
 	<li><s>pull in steps, expenses, blocks by date</s></li>
 	</ul>
-	<s>add project detail<br /></s>
-	TODO: Make sure all these \{\{\}\} get filled<br />
-	TODO: Create a "set_status" function for project, step &amp; block<br />
+	<s>TODO: add project detail<br /></s>
 	<s>TODO: Make this pretty in three columns<br /></s>
+  <s>TODO: Make sure all these \{\{\}\} get filled<br /></s>
+  <s>TODO: Create a "set_status" function for project, step &amp; block<br /></s>
+  TODO: Make 'Step Complete' Work<br />
+  <s>TODO: Add 'Edit Steps/Expenses/Blocks' links to go to their respective list pages<br /></s>
 </div>
-<div id="summaries">
-  <div id="latest_expenses" class="ui-widget tribulation" >
-    <div class="ui-widget-header">Latest Expenses:<br /></div>
-    {% for expense in latest_expenses %}
-      {{ expense.name }}<br />
-      &nbsp;&nbsp;&nbsp;
-      {% if expense.for %}
-        {{ expense.for }}
-      {% else %}
-        Generic Expense
-      {% endif %}
-      - {{ expense.amount }} - {{ expense.date }}<br />
-    {% endfor %}
-    <button id="expenses">Enter Expenses</button>
-  </div>
-  <div id="critical_steps" class="ui-widget tribulation" >
-    <div class="ui-widget-header">Critical Steps:<br /></div>
-    TODO: Conditional formattting, include better summary<br />
-    {% for step in critical_steps %}
-    <div id="step_{{step.id}}">
-      {{ step.name }}<br />
-      {{ step.description }}
-      <button id="complete_{{ step.id }}" class="step_complete">Step Complete</b                                                                                                                                utton>
-      <br />
-    </div>
-    {% endfor %}
-    <button id="steps">Edit Steps</button>
-  </div>
-  <div id="active_blocks" class="ui-widget tribulation">
-    <div class="ui-widget-header">Active Blocks:<br /></div>
-    TODO: Formatting<br />
-    {% for block in active_blocks %}
-      <div id="block_{{block.id}}">
-        {{ block.name }}
-        {% if block.affects %}
-         - {{ block.affects.name }}
-        {% endif %}
-        <button id="unblock_{{ block.id }}" class="unblock">Unblock</button>
-        <br />
-      </div>
-    {% endfor %}
-    <button id="blocks">Edit Blocks</button>
-    <br />
-  </div>
-</div>
+
 <script type="text/javascript">
   $(document).ready(function(){
     $("button").button();
     $("#form_dialog").unbind();
     $("#form_dialog").dialog({
         autoOpen:false,
-        height:315,
+        height:415,
         width:630,
         resizable:false,
         modal:true,
     });
     $("#steps").click(function(){
-      $("#form_dialog").load("/step/form/add.php");
-      $("#form_dialog").dialog("option","title","Create a new Project");
+      $("#form_dialog").load("/step/form/add.php?project=project_{{project.id}}");
+      $("#form_dialog").dialog("option","title","Create a new Step");
       $("#form_dialog").dialog("option","buttons", {
             "Save":function(){
             	$("#warning_dialog").dialog("option","title","Cannot Save");
               $("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
               var success=false;//easy canary
-              $.post("/step/update/project.php",
-                $("#project_form").serializeArray(),
+              $.post("/step/add/project.php",
+                $("#step_form").serializeArray(),
                 function(response){
                   if(typeof(response)==='undefined'||response===null||response.indexOf("ERROR")==-1){
                 	  location.reload();
@@ -115,8 +113,7 @@ div .tribulation{
                 "json"
               );
               if(!success){
-            	  //TODO: Fix warning dialog
-            	  alert("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
+            	//TODO: Fix warning dialog
                 $("#warning_dialog").dialog("Open");
               }
             },
@@ -127,6 +124,85 @@ div .tribulation{
         $("#form_dialog").dialog("open");
 
     });
+    $(".step_complete").click(function(){
+      alert("Button not implemented in current version. Please change step status in the Edit Step screen"); 
+    });
+    $(".edit_steps").click(function(){
+      document.location="/step/list_view/edit_steps.php?project="+$(this).attr('id');
+    });
+    $("#blocks").click(function(){
+      $("#form_dialog").load("/block/form/add.php?project=project_{{project.id}}");
+      $("#form_dialog").dialog("option","title","Create a new Block");
+      $("#form_dialog").dialog("option","buttons", {
+            "Save":function(){
+            	$("#warning_dialog").dialog("option","title","Cannot Save");
+              $("#warning_dialog").text("You were unable to save the block.  If you think you have recieved this error in error, you havent.");
+              var success=false;//easy canary
+              $.post("/block/add/project.php",
+                $("#block_form").serializeArray(),
+                function(response){
+                  if(typeof(response)==='undefined'||response===null||response.indexOf("ERROR")==-1){
+                	  location.reload();
+                  }
+                  //TODO: update page with ajax
+                },
+                "json"
+              );
+              if(!success){
+            	//TODO: Fix warning dialog
+                $("#warning_dialog").dialog("Open");
+              }
+            },
+            "Cancel":function(){
+              $(this).dialog("close");
+            }
+          });
+        $("#form_dialog").dialog("open");
+
+    });
+    $(".unblock").click(function(){
+      alert("Button not implemented in current version. Please change block status in the Edit Step screen"); 
+    });
+    $(".edit_blocks").click(function(){
+      document.location="/block/list_view/edit_blocks.php?project="+$(this).attr('id');
+    });
+    $("#expenses").click(function(){
+      $("#form_dialog").load("/budget/form/add.php?project=project_{{project.id}}");
+      $("#form_dialog").dialog("option","title","Enter Expense");
+      $('#form_dialog').dialog("option","width",700);
+      $("#form_dialog").dialog("option","buttons", {
+            "Save":function(){
+            	$("#warning_dialog").dialog("option","title","Cannot Save");
+              $("#warning_dialog").text("You were unable to save the expense.  If you think you have recieved this error in error, you havent.");
+              var success=false;//easy canary
+              $.post("/budget/add/from_overview.php",
+                $("#expense_form").serializeArray(),
+                function(response){
+                  if(typeof(response)==='undefined'||response===null||response.indexOf("ERROR")==-1){
+                	  location.reload();
+                  }
+                  //TODO: update page with ajax
+                },
+                "json"
+              );
+              if(!success){
+            	//TODO: Fix warning dialog
+                $("#warning_dialog").dialog("Open");
+              }
+            },
+            "Cancel":function(){
+              $(this).dialog("close");
+            }
+          });
+      $("#form_dialog").dialog("open");
+      $('#form_dialog').dialog("option","width",600);
+
+    });
+    $(".budget_sheet").click(function(){
+      document.location="/budget/list_view/sheet.php?project="+$(this).attr('id');
+    });
+
+
     $(".edit_project").click(function(){
         $("#form_dialog").load("/project/form/edit.php?id="+$(this).attr('id'));
         $("#form_dialog").dialog("option","title","Alter an Existing Project");

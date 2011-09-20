@@ -16,16 +16,18 @@
 			    >{{ status.name }}</option>
 			  {% endfor %}
 			</select><br />
-		  Project:<br />
+		<!--  Project:<br />
   		<select name="project">
 			  {% for project in projects %}
-			    <option value="{{ project.id }}" title="{{ project.description }}"
-			    {% if project.id = step.project %}
+			    <option value="{{ project.id }}" title="{{ project.name }}"
+			    {% if project.name = step.project %}
 			      selected="true"
 			    {% endif %}
 			    >{{ project.name }}</option>
 			  {% endfor %}
-			</select><br />
+      </select><br /> -->
+    Project - {{project.name}}<br />
+    <input name="project" type="hidden" value="{{project.id}}" />
 		<div style="float:right";>
 			Description:<br />
 			<textarea name="description" rows="4" cols="50">{{ step.description }}</textarea><br />

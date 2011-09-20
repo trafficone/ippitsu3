@@ -1,4 +1,4 @@
-{% if projects %}
+{% if steps %}
 <div style="float:left;margin:5px 120px 0px 10px;"><button id="new_step">New Step</button></div>
 <table id="step_list" class="display">
   <thead>
@@ -9,7 +9,7 @@
       <th>Created On</th>
       <th>Deadline</th>
       <th>Description</th>
-      <th>Critical</th>
+      <th>Critical&nbsp;</th>
     </tr>
   </thead>
   <tbody >
@@ -32,9 +32,32 @@ $(document).ready(function(){
   $("button").button();
   var bind_steps = function(){
 	    $(".step").click(function(){
-        //load form
+        $("#form_dialog").load("/step/form/edit.php?id="+$(this).attr('id'));
+        $("#form_dialog").dialog("option","title","Edit Step");
+        $("#form_dialog").dialog("option","buttons", {
+          "Save":function(){
+            $("#warning_dialog").dialog("option","title","Cannot Save");
+            $("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
+            var success=false;//easy canary
+            $.post("/step/update/newstep.php",
+              $("#step_form").serializeArray(),
+              function(response){
+                success=true;
+                //TODO: update datatables with ajax
+                location.reload();
+              },
+              "json"
+            );
+            if(!success){
+              $("#warning_dialog").dialog("Open");
+            }
+          },
+          "Cancel":function(){
+            $(this).dialog("close");
+          }
+        });
+        $("#form_dialog").dialog("open");	  
 	    });
-
 	  };
   var steplist = $('#step_list').dataTable({
     "bJQueryUI": true,
@@ -46,31 +69,32 @@ $(document).ready(function(){
       {"sClass":"col_text center","sWidth":"90px"}, 
       {"sClass":"col_text","sWidth":"90px"},
       {"sClass":"col_text"},
-      {"sClass":"col_money"},
       {"sClass":"col_date"},
-      {"sClass":"col_date","sWidth":"240px"}
+      {"sClass":"col_date"},
+      {"sClass":"col_text","sWidth":"210px"},
+      {"sClass":"col_money"}
     ],
     "fnDrawCallback": function() {
-      bind_projects();
+      bind_steps();
     }  
   });
   $("#form_dialog").unbind();
   $("#form_dialog").dialog({
 	    autoOpen:false,
-      height:315,
+      height:430,
       width:630,
       resizable:false,
       modal:true,
   });
   $("#new_step").click(function(){
-	  $("#form_dialog").load("/step/form/new.php");
+	  $("#form_dialog").load("/step/form/new.php?project=project_{{project.id}}");
 	  $("#form_dialog").dialog("option","title","Create a New Step");
 	  $("#form_dialog").dialog("option","buttons", {
       "Save":function(){
         $("#warning_dialog").dialog("option","title","Cannot Save");
         $("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
         var success=false;//easy canary
-        $.post("/step/add/newproject.php",
+        $.post("/step/add/newstep.php",
           $("#step_form").serializeArray(),
           function(response){
             success=true;
@@ -93,25 +117,25 @@ $(document).ready(function(){
 });
 </script>
 {% else %}
-Looks like you don't have any projects yet.
-Get started on your <button id="first">First Project</button>
+Looks like you don't have any steps yet.
+Get started on your <button id="first">First Step</button>
 <script type="text/javascript">
 $(document).ready(function(){
 	$("#first").button();
 	$("#form_dialog").unbind();
 	$("#form_dialog").dialog({
 		  autoOpen:false,
-		  height:315,
+		  height:430,
 	    width:630,
 	    resizable:false,
 	    modal:true,
 	    buttons: {
 	    	"Save":function(){
 	    		$("#warning_dialog").dialog("option","title","Cannot Save");
-	    		$("#warning_dialog").text("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
+	    		$("#warning_dialog").text("You were unable to save the step.  If you think you have recieved this error in error, you havent.");
 	    		var success=false;//easy canary
-	    		$.post("/project/add/first_project.php",
-	    			$("#project_form").serializeArray(),
+	    		$.post("/step/add/first_step.php",
+	    			$("#step_form").serializeArray(),
 	    			function(response){
 	    				success=true;
 	    				location.reload();
@@ -129,13 +153,10 @@ $(document).ready(function(){
 	});
 	$("#first").button()
 	$("#first").click(function(){
-		$("#form_dialog").load("/project/form/new.php");
-		$("#form_dialog").dialog("option","title","Create your First Project");
+		$("#form_dialog").load("/step/form/new.php?project=project_{{project.id}}");
+		$("#form_dialog").dialog("option","title","Create your First Step");
 		$("#form_dialog").dialog("open");
 	});
 });
 </script>
 {% endif %}
-
-
-

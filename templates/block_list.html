@@ -1,5 +1,162 @@
--> List out the blocks 
--> Open dialog window #editdialog and populate it with the contents of #blocks_dialog on edit
--> on edit failure open the #ajax_warning dialog TODO: ajax validation... yeah, yeah...
--> provide links to the parent project, and associated events 
--> TODO: provide a tooltip with event details on mousover
+{% if blocks %}
+<div style="float:left;margin:5px 120px 0px 10px;"><button id="new_block">New Block</button></div>
+<table id="block_list" class="display">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Project</th>
+      <th>Step</th>
+      <th>Discovery Date</th>
+      <th>Description</th>
+      <th>Fix Cost&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody >
+  {% for block in blocks %}
+    <tr id="block_{{ block.id }}" class="block">
+     <td>{{ block.name }}</td>
+     <td>{{ block.status }}</td>
+     <td>{{ block.project }}</td>
+     <td>{{ block.step }}</td>
+     <td>{{ block.discovery_date }}</td>
+     <td>{{ block.description }}</td>
+     <td>{{ block.fix_cost }}</td>
+    </tr>
+  {% endfor %}
+  </tr>
+  </tbody>
+</table>
+<script type="text/javascript">
+$(document).ready(function(){
+  $("button").button();
+  var bind_blocks = function(){
+	    $(".block").click(function(){
+        $("#form_dialog").load("/block/form/edit.php?id="+$(this).attr('id'));
+        $("#form_dialog").dialog("option","title","Create a New Block");
+        $("#form_dialog").dialog("option","buttons", {
+          "Save":function(){
+            $("#warning_dialog").dialog("option","title","Cannot Save");
+            $("#warning_dialog").text("You were unable to save the block.  If you think you have recieved this error in error, you havent.");
+            var success=false;//easy canary
+            $.post("/block/update/newblock.php",
+              $("#block_form").serializeArray(),
+              function(response){
+                success=true;
+                //TODO: update datatables with ajax
+                location.reload();
+              },
+              "json"
+            );
+            if(!success){
+              $("#warning_dialog").dialog("Open");
+            }
+          },
+          "Cancel":function(){
+            $(this).dialog("close");
+          }
+        });
+        $("#form_dialog").dialog("open");	  
+	    });
+	  };
+  var blocklist = $('#block_list').dataTable({
+    "bJQueryUI": true,
+    "sPaginationType": "full_numbers",
+    "aaSorting": [[1,"desc"]],
+    "bFilter": true,
+    "bSort": true,
+    "aoColumns": [
+      {"sClass":"col_text center","sWidth":"90px"}, 
+      {"sClass":"col_text","sWidth":"90px"},
+      {"sClass":"col_text"},
+      {"sClass":"col_text"},
+      {"sClass":"col_date"},
+      {"sClass":"col_text","sWidth":"210px"},
+      {"sClass":"col_money"}
+    ],
+    "fnDrawCallback": function() {
+      bind_blocks();
+    }  
+  });
+  $("#form_dialog").unbind();
+  $("#form_dialog").dialog({
+	    autoOpen:false,
+      height:430,
+      width:630,
+      resizable:false,
+      modal:true,
+  });
+  $("#new_block").click(function(){
+	  $("#form_dialog").load("/block/form/new.php?project=project_{{project}}");
+	  $("#form_dialog").dialog("option","title","Create a New Block");
+	  $("#form_dialog").dialog("option","buttons", {
+      "Save":function(){
+        $("#warning_dialog").dialog("option","title","Cannot Save");
+        $("#warning_dialog").text("You were unable to save the block.  If you think you have recieved this error in error, you havent.");
+        var success=false;//easy canary
+        $.post("/block/add/newblock.php",
+          $("#block_form").serializeArray(),
+          function(response){
+            success=true;
+            //TODO: update datatables with ajax
+            location.reload();
+          },
+          "json"
+        );
+        if(!success){
+          $("#warning_dialog").dialog("Open");
+        }
+      },
+      "Cancel":function(){
+        $(this).dialog("close");
+      }
+	  });
+	  $("#form_dialog").dialog("open");	  
+  });
+  
+});
+</script>
+{% else %}
+Looks like you don't have any blocks yet.
+Get started on your <button id="first">First Block</button>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#first").button();
+	$("#form_dialog").unbind();
+	$("#form_dialog").dialog({
+		  autoOpen:false,
+		  height:430,
+	    width:630,
+	    resizable:false,
+	    modal:true,
+	    buttons: {
+	    	"Save":function(){
+	    		$("#warning_dialog").dialog("option","title","Cannot Save");
+	    		$("#warning_dialog").text("You were unable to save the block.  If you think you have recieved this error in error, you havent.");
+	    		var success=false;//easy canary
+	    		$.post("/block/add/first_block.php",
+	    			$("#block_form").serializeArray(),
+	    			function(response){
+	    				success=true;
+	    				location.reload();
+	    			},
+	    			"json"
+	    		);
+	    		if(!success){
+	    			$("#warning_dialog").dialog("Open");
+	    		}
+	    	},
+	      "Cancel":function(){
+	    	  $(this).dialog("close");
+	      }
+	    }
+	});
+	$("#first").button()
+	$("#first").click(function(){
+		$("#form_dialog").load("/block/form/new.php?project=project_{{project}}");
+		$("#form_dialog").dialog("option","title","Create your First Block");
+		$("#form_dialog").dialog("open");
+	});
+});
+</script>
+{% endif %}

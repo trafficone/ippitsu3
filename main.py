@@ -48,7 +48,7 @@ class MainHandler(webapp.RequestHandler):
       menu.extend(["login","register"])
     else:
       menu.extend(["projects","settings"])
-      title["user"] = user
+      title["user"] = user.nickname()
       title["logout"] = users.create_logout_url("/")
       fullquery =  self.request.query_string.split('&')
       args = dict()
@@ -60,7 +60,7 @@ class MainHandler(webapp.RequestHandler):
       #ippitsu2.appspot.com/controller/method/tracker.php?value1=a&value2=b...
       if(len(request)>1):
         title["secondary"] = request[1]
-        resp = eval("controller.%s.%s(%s)"%(request[0],request[1],args))
+        resp = controller.request(request[0],request[1],args)
       else:
         title["primary"] = "home"
         resp = controller.static.get(request[0])
@@ -74,7 +74,7 @@ class MainHandler(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__),'401.html')
         self.response.set_status(401)
         self.response.out.write(template.render(path,{"url":self.request.url}))
-        logging.info("INFO: User "+user.get_current_user()+" tried to access unauthorized content.")
+        logging.info("INFO: User "+str(users.get_current_user())+" tried to access unauthorized content.")
       else:
         raise Exception(traceback.format_exc())
     except:
@@ -98,7 +98,7 @@ class MainHandler(webapp.RequestHandler):
       args = dict()
       for arg in self.request.arguments(): args[arg]=self.request.get(arg)
       #ippitsu2.appspot.com/controller/method/tracker.php
-      resp = eval("controller.%s.%s"%(request[0],request[1],))(args)
+      resp = controller.request(request[0],request[1],args)
     except Exception, err:
       e = err.args[0]
       if e == "notfound": 
