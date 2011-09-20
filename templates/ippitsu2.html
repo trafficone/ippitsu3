@@ -6,30 +6,34 @@
 <title>Axel and Jason's Ippitsu NI!</title>
 {% autoescape off %}
 {{ not_ajax }}
-{% endautoescape %}
 </head>
 <body>
 <form id="main_layer" action="/ippitsu2" method="post">
 <div class="ui-widget-header">Ippitsu2: The Collaborative Text Area</div>
 <p> To use, simply edit the text and hit "save".  You will overwrite all previous saves, including those that might have happened between the time you loaded the page and now.</p>
 <p><b>Enjoy!</b></p>  
-  <textarea cols="80" rows="24" wrap="hard" name="new_contents">{{ content }}
-</textarea>
+<textarea id="content" cols="80" rows="24" wrap="hard" name="new_contents">{{ content }}</textarea>
+{% endautoescape %}
   <p>
-Current time (UTC): {{ now }}<br />Last write (UTC): {{ last_write }} </p>
-  <button type="submit">Save</button><button type="reset">Undo-All</button><button id="refresh">Refresh</button>
+  Current time (UTC): <span id="currtime">{{ now }}</span><br />Last write (UTC): <span id="lastwrite">{{ last_write }}</span> </p>
+  <button id="submit">Save</button><button type="reset">Undo-All</button><button id="refresh">Refresh</button>
 </form>
 <script type="text/javascript">
   $(document).ready(function(){
 	  $("button").button();
 	  $("#refresh").click(function(){
-		  if ($("#content").length == 0){
-			  document.location = "/ippitsu2";
-		  } else {
-			  $("#content").load("/ippitsu2");
-		  }
-	  })
-	})
+      var newvals = $.load("/ippitsu2");
+      $("#content").html(newvals["content"]);
+      $("#currtime").html(newvals["now"]);
+      $("lastwrite").html(newvals["last_write"]);
+    });
+    $("#submit").click(function(){
+      $.post('/ippitsu2',$("#main_layer").serializeArray(),
+        function(data){
+          $("#refresh").click();
+        },json);
+    });
+	});
 </script>
 </body>
 </html>

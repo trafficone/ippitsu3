@@ -26,8 +26,8 @@
 			    >{{ project.name }}</option>
 			  {% endfor %}
       </select><br /> -->
-    Project - {{project.name}}<br />
-    <input name="project" type="hidden" value="{{project.id}}" />
+    Project - {{step.project.name}}<br />
+    <input name="project" type="hidden" value="{{step.project.id}}" />
 		<div style="float:right";>
 			Description:<br />
 			<textarea name="description" rows="4" cols="50">{{ step.description }}</textarea><br />

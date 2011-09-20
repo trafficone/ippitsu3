@@ -5,9 +5,10 @@
 # Inspired by Axel's Ippitsu
 #
 import cgi
-from datetime import datetime,tzinfo
 import time
 import os
+import json
+from datetime import datetime,tzinfo
 from google.appengine.dist import use_library
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 use_library('django','1.2')
@@ -51,14 +52,15 @@ class MainPage(webapp.RequestHandler):
         <script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js\"></script>\
         <!-- This, I can explain - I'm lazy. -->\
         <script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js\"></script>"
-
-    path = os.path.join(os.path.dirname(__file__), 'templates/ippitsu2.html')
-    self.response.out.write(template.render(path, template_values))
+      path = os.path.join(os.path.dirname(__file__), 'templates/ippitsu2.html')
+      self.response.out.write(template.render(path, template_values))
+    else:
+      self.response.out.write(json.dumps(template_values))
   def post(self):
     message = Message()
     message.content = self.request.get('new_contents')
     message.put()
-    self.redirect('/ippitsu2')
+    #self.redirect('/ippitsu2')
 
 application = webapp.WSGIApplication([
   ('/ippitsu2', MainPage),

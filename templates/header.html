@@ -74,7 +74,7 @@
       			var link = val.attr("id")
       			if (link == "projects"){
       				document.location = "/project/list_view/list.php";
-      			} else if (link == "login") {
+      			} else if (link == "login" || link == "register") {
       				document.location="login.php";
         	  } else {
         		  $("#content").load("/"+link);

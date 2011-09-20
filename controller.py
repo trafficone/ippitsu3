@@ -48,7 +48,10 @@ class static():
         return template.render(path,{'captcha':recaptcha.displayhtml(public_key='6Ld7IMgSAAAAAJNZJcIsENwlG7Qw8q3ICDu0h_dE',use_ssl=False,error=None)})
       else:
         path = os.path.join(os.path.dirname(__file__),'templates/static/nocontact.html')
-        return template.redrer(path,{})
+        return template.render(path,{})
+    elif page in ["legal.html"]:
+      path = os.path.join(os.path.dirname(__file__),'templates/static/legal.html')
+      return template.render(path,{})
     else:
       raise Exception('notfound')
 
@@ -130,6 +133,7 @@ class project():
     summ["expenses"] = map(models.Expense.to_dict,expenses)
     summ["project"]["budget_left"] = "$%.2f"%(summ["project"]["budget"] - total_expenses)
     summ["project"]["budget"]="$%.2f"%(summ["project"]["budget"])
+    summ["project"]["id"]=id
     return template.render(path,summ)
 
   #update the column with the given value
