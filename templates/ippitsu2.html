@@ -8,30 +8,37 @@
 {{ not_ajax }}
 </head>
 <body>
-<form id="main_layer" action="/ippitsu2" method="post">
+<form id="main_layer" action="/ippitsu2" method="POST">
 <div class="ui-widget-header">Ippitsu2: The Collaborative Text Area</div>
 <p> To use, simply edit the text and hit "save".  You will overwrite all previous saves, including those that might have happened between the time you loaded the page and now.</p>
 <p><b>Enjoy!</b></p>  
-<textarea id="content" cols="80" rows="24" wrap="hard" name="new_contents">{{ content }}</textarea>
+<textarea id="newcon" cols="80" rows="24" wrap="hard" name="new_contents">{{ content }}</textarea>
 {% endautoescape %}
   <p>
   Current time (UTC): <span id="currtime">{{ now }}</span><br />Last write (UTC): <span id="lastwrite">{{ last_write }}</span> </p>
-  <button id="submit">Save</button><button type="reset">Undo-All</button><button id="refresh">Refresh</button>
+  <button id="salve">Save</button><button type="reset">Undo-All</button><button id="refresh">Refresh</button>
 </form>
 <script type="text/javascript">
   $(document).ready(function(){
 	  $("button").button();
 	  $("#refresh").click(function(){
-      var newvals = $.load("/ippitsu2");
-      $("#content").html(newvals["content"]);
-      $("#currtime").html(newvals["now"]);
-      $("lastwrite").html(newvals["last_write"]);
+      $.getJSON("/ippitsu2?json=true",function(newvals){
+        $("#newcon").html(newvals["content"]);
+        $("#currtime").html(newvals["now"]);
+        $("#lastwrite").html(newvals["last_write"]);
+      });
+      return false;
     });
-    $("#submit").click(function(){
-      $.post('/ippitsu2',$("#main_layer").serializeArray(),
-        function(data){
-          $("#refresh").click();
-        },json);
+    $("#salve").click(function(){
+      $.post('/ippitsu2',
+        $("#main_layer").serializeArray(),
+        function(newvals){
+          $("#newcon").html(newvals["content"]);
+          $("#currtime").html(newvals["now"]);
+          $("#lastwrite").html(newvals["last_write"]);
+        }
+        ,'json');
+      return false;
     });
 	});
 </script>

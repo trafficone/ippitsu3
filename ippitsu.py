@@ -39,9 +39,11 @@ class MainPage(webapp.RequestHandler):
       mesg_date = "Never Written"
     template_values = { 
     'content': mesg_result,
-    'now': datetime.today(),
-    'last_write':  mesg_date}
-    if (['HTTP_X_REQUESTED_WITH'] not in self.request.headers.keys() or 
+    'now': str(datetime.today()),
+    'last_write':  str(mesg_date)}
+    if 'json=true' in self.request.query_string :
+      self.response.out.write(json.dumps(template_values))
+    elif (['HTTP_X_REQUESTED_WITH'] not in self.request.headers.keys() or 
         (['HTTP_X_REQUESTED_WITH'] in self.request.headers.keys() and 
          self.request.headers['HTTP_X_REQUESTED_WITH'] != 'XMLHttpRequest')):
       template_values['not_ajax']=  "\
@@ -54,12 +56,25 @@ class MainPage(webapp.RequestHandler):
         <script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.5/tiny/jquery.tools.min.js\"></script>"
       path = os.path.join(os.path.dirname(__file__), 'templates/ippitsu2.html')
       self.response.out.write(template.render(path, template_values))
-    else:
-      self.response.out.write(json.dumps(template_values))
   def post(self):
     message = Message()
     message.content = self.request.get('new_contents')
     message.put()
+    try:
+      message = db.GqlQuery("SELECT * "
+                            "FROM Message "
+                            "ORDER BY date DESC LIMIT 1")
+      mesg_result = cgi.escape(message[0].content)
+      mesg_date = message[0].date
+    except IndexError:
+      #fail safe if there is nothing in the database
+      mesg_result = ""
+      mesg_date = "Never Written"
+    template_values = { 
+    'content': mesg_result,
+    'now': str(datetime.today()),
+    'last_write':  str(mesg_date)}
+    self.response.out.write(json.dumps(template_values))
     #self.redirect('/ippitsu2')
 
 application = webapp.WSGIApplication([
