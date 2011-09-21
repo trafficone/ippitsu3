@@ -178,8 +178,8 @@ class Expense(db.Model):
     "fkey":self.fkey}
   @staticmethod
   def from_dict(dictionary,expense=None):
-    if not "ftab" in dictionary.keys():dictionary["ftab"]=None
-    if not "fkey" in dictionary.keys():dictionary["fkey"]=None
+    if not "ftab" in dictionary.keys() or dictionary["ftab"] == "None":dictionary["ftab"]=None
+    if not "fkey" in dictionary.keys() or dictionary["fkey"] == "None":dictionary["fkey"]=None
     if dictionary["ftab"] != None and dictionary["fkey"] != None:
       dictionary["fkey"] = Expense.TABLES[dictionary["ftab"]].get(dictionary["fkey"])
     if expense == None:

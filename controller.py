@@ -190,6 +190,7 @@ class step():
       step = models.Step.get(id);
       retval["step"] = step.to_dict()
       retval["step"]["project"] = retval["step"]["project"].to_dict() 
+      retval["step"]["status"]  = step.status.name
       retval["step"]["start_date"] = "%d/%d/%d"%(retval["step"]["start_date"].year, retval["step"]["start_date"].month, retval["step"]["start_date"].day)
       retval["step"]["deadline"] = "%d/%d/%d"%(retval["step"]["deadline"].year,retval["step"]["deadline"].month,retval["step"]["deadline"].day)
     elif 'project' in options.keys():
@@ -251,7 +252,7 @@ class step():
       steps[str(step.key())]=step.name
     return json.dumps(steps)
 
-#TODO: Block and budget classes
+#Block and budget classes
 class block():
   #load a specific block for editing
   #TODO: Speed this up!!!
@@ -266,7 +267,7 @@ class block():
     if 'id' in options.keys():
       id = options['id'].split('_')[1]
       block = models.Block.get(id);
-      retval["steps"]=map(models.Step.to_dict(),models.Step.all().filter("project =",block.project))
+      retval["steps"]= map(models.Step.to_dict,models.Step.all().filter("project =",block.project))
       retval["block"] = block.to_dict()
       retval["block"]["step"] = retval["block"]["step"].name if retval["block"]["step"]!=None else "None"
       retval["block"]["project"] = retval["block"]["project"].to_dict() 
@@ -341,7 +342,9 @@ class budget():
       retval["expense"] = expen
       retval["expense"]["amount"] = "$%.2f"%expen["amount"]
       retval["expense"]["date"] = "%d/%d/%d"%(expen["date"].year,expen["date"].month,expen["date"].day)
-      retval["expense"]["fkey"] = {"name":expen["fkey"].name,"value":str(expen["fkey"].key())}
+      keyname = expen["fkey"].name if expen["fkey"] != None else 'None'
+      keyval =  expen["fkey"].key() if expen["fkey"] != None else 'None'
+      retval["expense"]["fkey"] = {"name":keyname,"value":str(keyval)}
       retval["expense"]["ftab"]
     authcheck(proj)
     retval["project"] = proj.to_dict()
@@ -392,7 +395,7 @@ class budget():
     expenses = models.Expense.all().filter("project =",proj)
     expense_list = map(models.Expense.to_dict,expenses)
     for expense in expense_list:
-      expense["fkey"] = expense["fkey"].name
+      expense["fkey"] = expense["fkey"].name if expense["fkey"] != None else 'None'
       expense["amount"] = "$%.2f"%expense["amount"]
     dictio = {"expenses":expense_list,"tables":models.Expense.TABLES}
     return template.render(path, dictio)

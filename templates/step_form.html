@@ -6,11 +6,11 @@
 		<div style="float:left;">
 			Name:<br />
 			<input type="text" name="name" value="{{ step.name }}" size="30"/><br />
-			Status:<br />
+      Status:<br />
 			<select name="status">
 			  {% for status in statuses %}
 			    <option value="{{ status.id }}" title="{{ status.description }}"
-			    {% if status.id == step.status %}
+			    {% if status.name == step.status %}
 			      selected="true"
 			    {% endif %}
 			    >{{ status.name }}</option>

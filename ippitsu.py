@@ -7,7 +7,7 @@
 import cgi
 import time
 import os
-import json
+import simplejson as json
 from datetime import datetime,tzinfo
 from google.appengine.dist import use_library
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
