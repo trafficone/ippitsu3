@@ -9,7 +9,7 @@
 			<select name="status">
 			  {% for status in statuses %}
 			    <option value="{{ status.id }}" title="{{ status.description }}"
-			    {% if status.id == block.status %}
+			    {% if status.name == block.status %}
 			      selected="true"
 			    {% endif %}
 			    >{{ status.name }}</option>

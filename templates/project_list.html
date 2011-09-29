@@ -29,6 +29,7 @@
 $(document).ready(function(){
   $("button").button();
   var bind_projects = function(){
+      $(".project").unbind("click");
 	    $(".project").click(function(){
 	    	document.location = "/project/summary/fromlist.php?id="+$(this).attr('id');
 	    });
@@ -57,7 +58,7 @@ $(document).ready(function(){
       height:315,
       width:650,
       resizable:false,
-      modal:true,
+      modal:true
   });
   $("#new_project").click(function(){
 	  $("#form_dialog").load("/project/form/new.php");
@@ -66,19 +67,28 @@ $(document).ready(function(){
       "Save":function(){
         $("#warning_dialog").dialog("option","title","Cannot Save");
         $("#warning_dialog").text("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
-        var success=false;//easy canary
-        $.post("/project/add/newproject.php",
-          $("#project_form").serializeArray(),
-          function(response){
-            success=true;
+        $.ajax({
+          url:"/project/add/newproject.php",
+          data:$("#project_form").serializeArray(),
+          dataType:'json',
+          type:'POST',
+          success: function(response){
             //TODO: update datatables with ajax
-            location.reload();
+            if("ERROR" in response){
+              $("#warning_dialog").text(response["ERROR"]);
+              $("#warning_dialog").dialog("open");
+            } else {
+              var index = projlist.fnAddData([response['name'],response['status'],response['budget'],response['start_date'],response['deadline'],response['description']]);
+              projlist.fnGetNodes(index).id = 'project_'+response['id'];
+              $(projlist.fnGetNodes(index)).addClass('project');
+              bind_projects();
+              $("#form_dialog").dialog("close");
+            }
           },
-          "json"
-        );
-        if(!success){
-          $("#warning_dialog").dialog("Open");
-        }
+          failure: function(){ 
+            $("#warning_dialog").dialog("open");
+          }
+        });
       },
       "Cancel":function(){
         $(this).dialog("close");

@@ -2,8 +2,12 @@ from datetime import date
 from google.appengine.ext import db
 
 def str_to_date(stri):
-  dat = map(int,stri.split("/"))
-  return date(dat[0],dat[1],dat[2])
+  #stri = stri.replace("%2","/").replace("F","").replace("f","")
+  try:
+    dat = map(int,stri.split("/"))
+    return date(dat[0],dat[1],dat[2])
+  except:
+    return None
 
 class Status(db.Model):
   name = db.StringProperty(required=True) #notnull
@@ -19,11 +23,11 @@ class Status(db.Model):
 class Project(db.Model):
   name = db.StringProperty(required=True) #notnull
   status = db.ReferenceProperty(Status,required=True) #notnull
-  description = db.StringProperty(required=True)
+  description = db.StringProperty(required=True,multiline=True)
   start_date = db.DateProperty(required=True) #notnull
   budget = db.IntegerProperty(required=True) #notnull #last two digits are cents
-  created = db.DateProperty(default=date.today(),required=True)
-  deadline = db.DateProperty() #notnull
+  created = db.DateProperty(default=date.today(),required=True) #notnull
+  deadline = db.DateProperty()
   owner = db.UserProperty(required=True) #notnull
   def delete(self):
     for exp in Expense.all().filter("project =",self.key()):
@@ -43,12 +47,16 @@ class Project(db.Model):
       "deadline":self.deadline}
   @staticmethod
   def from_dict(dictionary,project=None):
+    try:
+      budgetval = int(float(dictionary["budget"].replace("$","").replace(",",""))*100)
+    except:
+      raise Exception("Budget value is Invalid")
     if project==None:
       return Project(name = dictionary["name"],
         description=dictionary["description"],
         status=Status.get(dictionary["status"]),
         start_date=str_to_date(dictionary["start_date"]),
-        budget=int(float(dictionary["budget"].replace("$",""))*100),
+        budget=budgetval,
         deadline=str_to_date(dictionary["deadline"]),
         owner=dictionary["owner"])
     else:
@@ -56,13 +64,13 @@ class Project(db.Model):
       project.description=dictionary["description"]
       project.status=Status.get(dictionary["status"])
       project.start_date=str_to_date(dictionary["start_date"])
-      project.budget=int(float(dictionary["budget"].replace("$",""))*100)
+      project.budget=budgetval
       project.deadline=str_to_date(dictionary["deadline"])
       return project
     
 class Step(db.Model):
   name = db.StringProperty(required=True) #notnull
-  description = db.StringProperty(required=True) #notnull
+  description = db.StringProperty(required=True,multiline=True) #notnull
   project = db.ReferenceProperty(Project,required=True) #notnull
   status = db.ReferenceProperty(Status,required=True) #notnull
   created = db.DateProperty(default=date.today(),required=True) #notnull
@@ -110,7 +118,7 @@ class Step(db.Model):
       return step
 class Block(db.Model):
   name = db.StringProperty(required=True) #notnull 
-  description = db.StringProperty(required=True) #notnull
+  description = db.StringProperty(required=True,multiline=True) #notnull
   status = db.ReferenceProperty(Status,required=True) #notnull
   project = db.ReferenceProperty(Project,required=True) #notnull
   step = db.ReferenceProperty(Step)
@@ -145,7 +153,7 @@ class Block(db.Model):
         project=Project.get(dictionary["project"]),
         step=stepspot,
         discovery_date=str_to_date(dictionary["discovery_date"]),
-        fix_cost=int(float(dictionary["fix_cost"].replace("$",""))*100))
+        fix_cost=int(float(dictionary["fix_cost"].replace("$","").replace(",",""))*100))
     else:
       block.name=dictionary["name"]
       block.description=dictionary["description"]
@@ -153,13 +161,13 @@ class Block(db.Model):
       block.project=Project.get(dictionary["project"])
       block.step=stepspot 
       block.discovery_date=str_to_date(dictionary["discovery_date"])
-      block.fix_cost=int(float(dictionary["fix_cost"].replace("$",""))*100)
+      block.fix_cost=int(float(dictionary["fix_cost"].replace("$","").replace(",",""))*100)
       return block
   
 class Expense(db.Model):
   TABLES = {"Status":Status,"Project":Project,"Step":Step,"Block":Block}
   name = db.StringProperty(required=True) #notnull
-  description = db.StringProperty(required=True) #notnull
+  description = db.StringProperty(required=True,multiline=True) #notnull
   project = db.ReferenceProperty(Project,required=True) #notull
   pay_for = db.StringProperty(required=True) #notnull
   amount = db.IntegerProperty(required=True) #notnull
@@ -188,7 +196,7 @@ class Expense(db.Model):
         description=dictionary["description"],
         project=Project.get(dictionary["project"]),
         pay_for=dictionary["pay_for"],
-        amount=int(float(dictionary["amount"].replace("$",""))*100),
+        amount=int(float(dictionary["amount"].replace("$","").replace(",",""))*100),
         date=str_to_date(dictionary["date"]),
         ftab=dictionary["ftab"],
         fkey=dictionary["fkey"])
@@ -197,7 +205,7 @@ class Expense(db.Model):
       expense.description=dictionary["description"]
       expense.project=Project.get(dictionary["project"])
       expense.pay_for=dictionary["pay_for"]
-      expense.amount=int(float(dictionary["amount"].replace("$",""))*100)
+      expense.amount=int(float(dictionary["amount"].replace("$","").replace(",",""))*100)
       expense.date=str_to_date(dictionary["date"])
       expense.ftab=dictionary["ftab"]
       expense.fkey=dictionary["fkey"]

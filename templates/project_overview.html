@@ -70,7 +70,7 @@ div .tribulation{
         height:415,
         width:650,
         resizable:false,
-        modal:true,
+        modal:true
     });
     $("#steps").click(function(){
       $("#form_dialog").load("/step/form/add.php?project=project_{{project.id}}");
@@ -201,7 +201,6 @@ div .tribulation{
               );
               if(!success){
             	  //TODO: Fix warning dialog
-            	  alert("You were unable to save the project.  If you think you have recieved this error in error, you havent.");
                 $("#warning_dialog").dialog("Open");
               }
             },

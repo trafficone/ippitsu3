@@ -89,7 +89,8 @@ class project():
       if proj == None: raise Exception('notfound')
       dictio["project"] = proj.to_dict()
       dictio["project"]["start_date"] = "%d/%d/%d"%(proj.start_date.year,proj.start_date.month,proj.start_date.day)
-      dictio["project"]["deadline"] = "%d/%d/%d"%(proj.deadline.year,proj.deadline.month,proj.deadline.day)
+      dictio["project"]["deadline"] = "%d/%d/%d"%(proj.deadline.year,proj.deadline.month,proj.deadline.day) if dictio["project"]["deadline"] != None else "None"
+      dictio["project"]["status"] = proj.status.name
     dictio["statuses"] = []
     for status in models.Status.all():
         stat = status.to_dict()
@@ -159,9 +160,16 @@ class project():
     try:
       newproj = models.Project.from_dict(proj)
       newproj.put()
+      newproj = newproj.to_dict()
+      newproj["status"] =  newproj["status"].name
+      newproj["id"] = str(newproj["id"])
+      newproj["budget"] = "$%.2f"%(newproj["budget"])
+      newproj["start_date"] = "%d/%d/%d"%(newproj["start_date"].year,newproj["start_date"].month,newproj["start_date"].day)
+      newproj["deadline"] = "%d/%d/%d"%(newproj["deadline"].year,newproj["deadline"].month,newproj["deadline"].day) if newproj["deadline"] != None else "None"
+      return json.dumps(newproj)
     except Exception, e:
       #TODO: Implement AJAX validation loop here
-      return "ERROR: "+e.args[0]
+      return '{"ERROR": "'+str(e.args[0])+'"}'
   
   #delete a record from the project table
   @staticmethod
@@ -269,6 +277,7 @@ class block():
       block = models.Block.get(id);
       retval["steps"]= map(models.Step.to_dict,models.Step.all().filter("project =",block.project))
       retval["block"] = block.to_dict()
+      retval["status"] = block.status.name
       retval["block"]["step"] = retval["block"]["step"].name if retval["block"]["step"]!=None else "None"
       retval["block"]["project"] = retval["block"]["project"].to_dict() 
       retval["block"]["discovery_date"] = "%d/%d/%d"%(retval["block"]["discovery_date"].year, retval["block"]["discovery_date"].month, retval["block"]["discovery_date"].day)

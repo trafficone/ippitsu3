@@ -10,7 +10,7 @@
 			<select name="status">
 			  {% for status in statuses %}
 			    <option value="{{ status.id }}" title="{{ status.description }}"
-			    {% if status.id == project.status %}
+			    {% if status.name == project.status %}
 			      selected="true"
 			    {% endif %}
 			    >{{ status.name }}</option>
